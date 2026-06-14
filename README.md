@@ -39,6 +39,28 @@ nix develop github:josiah14/mise#mercury-22-01-8
 The fragment after `#` names the devShell — see [Environments](#environments) for what's
 currently available.
 
+### Use a single environment as your project's devShell
+
+If your project needs exactly one of mise's environments and nothing else, alias it directly —
+no `mkShell`, no `nixpkgs` input:
+
+```nix
+{
+  inputs.mise.url = "github:josiah14/mise";
+
+  outputs = { mise, ... }:
+    let
+      system = "x86_64-linux";
+    in {
+      devShells.${system}.default = mise.devShells.${system}.mercury-22-01-8;
+    };
+}
+```
+
+With no `nixpkgs` input of your own, there's no second nixpkgs evaluation to collapse, so
+`nixpkgs.follows` isn't needed. If you later need to add packages alongside mise's environment,
+switch to the `mkShell` + `inputsFrom` pattern below — that's when `follows` becomes relevant.
+
 ### Compose multiple environments in a project
 
 ```nix
@@ -118,7 +140,7 @@ something the current lock doesn't have.
 
 | Shell | Provides |
 |-------|----------|
-| *(none yet — work in progress)* | |
+| `mercury-22-01-8` | Mercury 22.01.8 (`pkgs.mercury`, `overrideAttrs`'d), built with `--enable-deep-profiler`, `--with-default-grade=asm_fast.gc.par.stseg`, and `--enable-libgrades=asm_fast.gc.par.stseg.debug` — adds parallel + debug grades alongside the default, plus deep-profiler CGI support. |
 
 ## Design decisions
 
