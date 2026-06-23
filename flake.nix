@@ -3,8 +3,8 @@
     {
       nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     }
-    // import ./languages/mercury/inputs.nix
-    // import ./tools/bats/inputs.nix;
+    // (import ./languages/mercury/inputs.nix)
+    // (import ./tools/bats/inputs.nix);
 
   outputs = inputs@{ self, nixpkgs, ... }:
     let
