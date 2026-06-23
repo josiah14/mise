@@ -59,3 +59,42 @@ profiling, parallelization, and debugging capabilities."
 **Next:** this same session went on to give `pineapple-paint-nightmare-95` its own
 `flake.nix` that consumes this devShell directly as a flake input — mise's first
 real consumer (see that project's BUILDLOG, Session 2, for the consumer side).
+
+---
+
+## Session 2 — 2026-06-23 18:16 UTC
+
+Expanded mise from a Mercury-only environment into version-pinned, composable tool
+environments for Cinnabar and Cinnabar-worked.
+
+- Josiah directed the required Mercury-grade set and evaluated the implications of
+each grade. The resulting library grades are `asm_fast.par.gc.stseg`,
+`asm_fast.gc.stseg` (the new default), `asm_fast.gc.debug.stseg`,
+`asm_fast.gc.prof.stseg`, `asm_fast.gc.profdeep.stseg`, and `asm_fast.gc.tr`.
+- Josiah identified that Bats source pinning at the flake root would become brittle
+when supporting multiple Bats versions. After weighing flake-input pinning against
+version-local fixed source pins, **Josiah chose version-local pins**. Bats 1.12.0
+and Mercury 22.01.8 now each fetch their pinned nixpkgs source directly with a
+fixed revision and `narHash` in their version expressions.
+- Added Bats 1.12.0 and refactored mise to export both standalone devShells and
+composable package lists. The consumer shells compose package lists directly:
+`inputsFrom` was evaluated and rejected because it did not put child `mkShell`
+packages on the parent shell PATH.
+- Josiah performed the decisive environment evaluations: entered the real Cinnabar
+devShell, checked `which` and `type -a`, ran `mmc --version` and `bats --version`,
+and updated consumer lock files with `nix flake update mise`.
+- All six enabled Mercury grades were validated by compiling and linking Cinnabars
+stdlib-using `tokenizer.m` in isolated temporary directories. Every grade passed;
+the only output was an existing determinism warning in the exercise source.
+- The zsh issue was isolated from Nix package composition through comparative Bash
+and zsh tests. Josiah restored his known-good global zsh configuration; Cinnabar
+now uses a project-local `ZDOTDIR` wrapper that restores the dev-shell PATH after
+the users normal zsh startup files run. Both `mmc` and `bats` resolve from
+`/nix/store` in `nix develop -c zsh`.
+
+**Outcome:** Cinnabars composed shell exposes Mercury 22.01.8 and Bats 1.12.0
+from its Nix closure, while normal user zsh configuration remains independent.
+
+**Next:** add future tool or compiler versions as separate version expressions with
+their own fixed source revisions and hashes; update consumer locks after each mise
+release.
