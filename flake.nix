@@ -6,7 +6,7 @@
     // import ./languages/mercury/inputs.nix
     // import ./tools/bats/inputs.nix;
 
-  outputs = { self, nixpkgs, bats-1-12-0-nixpkgs }:
+  outputs = inputs@{ self, nixpkgs, ... }:
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
