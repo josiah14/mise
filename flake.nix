@@ -24,7 +24,7 @@
           mercury-22-01-8 = pkgs.mkShell {
             packages = packages.mercury-22-01-8;
 
-            shellHook = ''
+            shellHook = nixpkgs.lib.optionalString (system == "aarch64-linux") ''
               # asm_fast.*.stseg's nondet stack segment auto-growth doesn't
               # reliably kick in on aarch64-linux, so even non-recursive
               # programs can overflow the 64k-word default. Force a larger
