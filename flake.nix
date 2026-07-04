@@ -23,6 +23,14 @@
         {
           mercury-22-01-8 = pkgs.mkShell {
             packages = packages.mercury-22-01-8;
+
+            shellHook = ''
+              # asm_fast.*.stseg's nondet stack segment auto-growth doesn't
+              # reliably kick in on aarch64-linux, so even non-recursive
+              # programs can overflow the 64k-word default. Force a larger
+              # initial allocation to work around it.
+              export MERCURY_OPTIONS="--nondetstack-size 16384"
+            '';
           };
           bats-1-12-0 = pkgs.mkShell {
             packages = packages.bats-1-12-0;
