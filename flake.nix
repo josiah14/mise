@@ -5,24 +5,28 @@
 
   outputs = { self, nixpkgs }:
     let
-      system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
-      mercuryPackages = import ./languages/mercury/compilers/22.01.8.nix { inherit system; };
-      batsPackages = import ./tools/bats/1.12.0.nix { inherit system; };
+      systems = [ "x86_64-linux" "aarch64-linux" ];
+      forAllSystems = nixpkgs.lib.genAttrs systems;
+      packagesFor = system: {
+        mercury-22-01-8 = import ./languages/mercury/compilers/22.01.8.nix { inherit system; };
+        bats-1-12-0 = import ./tools/bats/1.12.0.nix { inherit system; };
+      };
     in
     {
-      lib.${system} = {
-        mercury-22-01-8 = mercuryPackages;
-        bats-1-12-0 = batsPackages;
-      };
+      lib = forAllSystems packagesFor;
 
-      devShells.${system} = {
-        mercury-22-01-8 = pkgs.mkShell {
-          packages = mercuryPackages;
-        };
-        bats-1-12-0 = pkgs.mkShell {
-          packages = batsPackages;
-        };
-      };
+      devShells = forAllSystems (system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+          packages = packagesFor system;
+        in
+        {
+          mercury-22-01-8 = pkgs.mkShell {
+            packages = packages.mercury-22-01-8;
+          };
+          bats-1-12-0 = pkgs.mkShell {
+            packages = packages.bats-1-12-0;
+          };
+        });
     };
 }
